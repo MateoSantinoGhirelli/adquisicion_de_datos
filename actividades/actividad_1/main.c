@@ -3,8 +3,6 @@
 #include <math.h>
 #include "pico/stdlib.h"
 #include "hardware/adc.h"
-#include "hardware/i2c.h"
-#include "lcd_i2c.h"
 
 /*
  * @brief Programa principal
@@ -15,42 +13,36 @@ int main() {
     // Variable para guardar el valor de temperatura
     float temperatura = 0.0;
     // Constante de proporcionalidad del termistor
-    const uint16_t beta = 3950;
+    const uint16_t beta = 4000;
     // Habilito USB
     stdio_init_all();
-    // Configuro el I2C0 a 100 KHz de clock
-    i2c_init(i2c0, 100 * 1000);
-    // Elijo GPIO4 como linea de SDA
-    gpio_set_function(4, GPIO_FUNC_I2C);
-    // Elijo GPIO5 como linea de SCL
-    gpio_set_function(5, GPIO_FUNC_I2C);
-    // Activo pull-up en ambos GPIO, son debiles por lo que
-    // es recomendable usar pull-ups externas
-    gpio_pull_up(4);
-    gpio_pull_up(5);
-    // Inicializacion del LCD
-    lcd_init();
     // Inicializo ADC
-
-    // Inicializo GPIO26 como entrada analogica
-
+    adc_init();
+    // Inicializo GPIO26 como entrada analogicaS
+    adc_gpio_init(26);
     // Selecciono canal analogico
-
+    adc_select_input(0);
     while(true) {
         // Leer NTC
-        
         // Calculo temperatura
+    
         
-        // Limpio LCD
-        lcd_clear();
-        // Variable para el string
-        char str[16];
-        // Creo string
-        
-        // Imprimo string en segunda fila
-        lcd_string(str);
+        int i = 0;
+        temperatura = 0;
+        for (i=0; i<10; i++) {
+            adc_value= adc_read();
+            float vx = (adc_value*3.3)/4095;
+            float rt = 3300.0/((3.3/vx)-1);
+            float temp = (((beta*298.15)) / ((298*log(rt/2200)) + beta)) - 273;
+           temperatura += temp;
+        }
+        temperatura = temperatura / 10;
+        //printf("Valor el adc es %d \n",adc_value);
+        //printf("El valor de la tension es %.2f\n",vx);
+        //printf("El valor de resistencia es %.2f\n",rt);
+        printf("La temperatura es %.2f\n\n",temperatura);
         // Espero 500 ms
-        sleep_ms(500);
+        sleep_ms(500);   
     }
     return 0;
 }
