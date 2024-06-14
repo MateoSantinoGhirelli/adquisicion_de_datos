@@ -11,7 +11,12 @@
 int main() {
     // Habilito USB
     stdio_init_all();
-
+    // Incicializacion del I2C0
+    i2c_init(i2c0, 100000);
+    gpio_set_function(4, GPIO_FUNC_I2C);
+    gpio_set_function(5, GPIO_FUNC_I2C);
+    gpio_pull_up(4);
+    gpio_pull_up(5);
     // Inicializacion del LCD
     lcd_init();
     // Inicializo BMP280
